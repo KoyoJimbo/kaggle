@@ -9,6 +9,17 @@ train_df = pd.read_csv("train.csv", header=0)
 train_df["Gender"] = train_df["Sex"].map({"female": 0, "male": 1}).astype(int)
 train_df.head(6)
 
+######################
+def male_feamale_child(passenger):
+    age,sex = passenger
+    if age < 16:
+        return 3
+    else:
+        return sex
+
+train_df["person"] =\
+train_df[["Age", "Gender"]].apply(male_feamale_child,axis=1)
+######################
 # Complement the missing values of "Age" column with average of "Age"
 median_age = train_df["Age"].dropna().median()
 if len(train_df.Age[train_df.Age.isnull()]) > 0:
@@ -22,6 +33,10 @@ train_df.head(6)
 # Load test data, Convert "Sex" to be a dummy variable
 test_df = pd.read_csv("test.csv", header=0)
 test_df["Gender"] = test_df["Sex"].map({"female": 0, "male": 1}).astype(int)
+######################
+test_df["person"] =\
+test_df[["Age", "Gender"]].apply(male_feamale_child,axis=1)
+######################
 
 # Complement the missing values of "Age" column with average of "Age"
 median_age = test_df["Age"].dropna().median()
@@ -46,5 +61,3 @@ file_object.writerow(["PassengerId", "Survived"])
 
 file_object.writerows(zip(ids, output))
 submit_file.close()
-
-
