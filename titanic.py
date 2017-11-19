@@ -27,7 +27,7 @@ median_age = train_df["Age"].dropna().mean()
 if len(train_df.Age[train_df.Age.isnull()]) > 0:
   train_df.loc[(train_df.Age.isnull()), "Age"] = median_age
 ######################
-median_fare = train_df["Fare"].dropna().median()
+median_fare = train_df["Fare"].dropna().mean()
 if len(train_df.Fare[train_df.Fare.isnull()]) > 0:
   train_df.loc[(train_df.Fare.isnull()), "Fare"] = median_fare
 ######################
@@ -52,7 +52,7 @@ median_age = test_df["Age"].dropna().mean()
 if len(test_df.Age[test_df.Age.isnull()]) > 0:
   test_df.loc[(test_df.Age.isnull()), "Age"] = median_age
 ######################
-median_fare = test_df["Fare"].dropna().median()
+median_fare = test_df["Fare"].dropna().mean()
 if len(test_df.Fare[test_df.Fare.isnull()]) > 0:
   test_df.loc[(test_df.Fare.isnull()), "Fare"] = median_fare
 ######################
