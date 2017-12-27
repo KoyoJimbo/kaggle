@@ -1,16 +1,9 @@
 import pandas as pd
 import csv as csv
 from sklearn.ensemble import RandomForestClassifier
+from statistics import median
 
-# Load training data
-train_df = pd.read_csv("train.csv", header=0)
-
-# Convert "Sex" to be a dummy variable (female = 0, Male = 1)
-train_df["Gender"] = train_df["Sex"].map({"female": 0, "male": 1}).astype(int)
-
-#######################
 #   name
-
 def get_title(name):
     title = str(name).split(",")
     if(len(title)>1):
@@ -43,14 +36,9 @@ def convert_title(title):
     else:
         return 0
 
-# can use
-#train_df['Title'] = train_df['Name'].apply(lambda x: get_title(x))
-#train_df['Title'] = train_df['Title'].apply(lambda x: convert_title(x))
-
 # Cabin
-
 def get_kind_of_cabin(name):
-    if(title!=None):
+    if(name!=None):
         title = str(name)[0]
     return title
 
@@ -72,11 +60,6 @@ def convert_Cabin(embarked):
     elif embarked == G:
         return 6
 
-
-#train_df['KindOfCabin'] = train_df['Cabin'].apply(lambda x: get_kind_of_cabin(x))
-#train_df['KindOfCabin'] = train_df['KindOfCabin'].apply(lambda x: convert_title(x))
-
-
 # Embarked
 def MarkEmbarked(embarked):
     if not embarked in ('S', 'C', 'Q'):
@@ -88,19 +71,6 @@ def MarkEmbarked(embarked):
     elif embarked == 'Q':
         return 2
 
-
-train_df["Embarked"]\
-= train_df.apply(lambda row: MarkEmbarked(row["Embarked"]),axis=1)
-
-mean_embarked = train_df["Embarked"].dropna().mean()
-if len(train_df.Embarked[train_df.Embarked.isnull()]) > 0:
-  train_df.loc[(train_df.Embarked.isnull()), "Embarked"] = mean_embarked
-
-
-# FamilySize
-train_df["FamilySize"] = train_df["SibSp"] + train_df["Parch"] + 1
-
-
 # person
 def male_feamale_child(passenger):
     age,sex = passenger
@@ -109,85 +79,73 @@ def male_feamale_child(passenger):
     else:
         return sex
 
-train_df["person"] =\
-train_df[["Age", "Gender"]].apply(male_feamale_child,axis=1)
+# Load training data
+train_df = pd.read_csv("train.csv", header=0)
+test_df  = pd.read_csv("test.csv" , header=0)
 
-# Fare
-median_fare = train_df["Fare"].dropna().mean()
-if len(train_df.Fare[train_df.Fare.isnull()]) > 0:
-  train_df.loc[(train_df.Fare.isnull()), "Fare"] = median_fare
-######################
+# Convert "Sex" to be a dummy variable (female = 0, Male = 1)
+train_df["Gender"] = train_df["Sex"].map({"female": 0, "male": 1}).astype(int)
+test_df["Gender"]  =  test_df["Sex"].map({"female": 0, "male": 1}).astype(int)
 
 # Complement the missing values of "Age" column with average of "Age"
-median_age = train_df["Age"].dropna().mean()
+train_age_comverted = train_df["Age"].dropna().mean()
+test_age_comverted =  test_df["Age"].dropna().mean()
+
 if len(train_df.Age[train_df.Age.isnull()]) > 0:
-  train_df.loc[(train_df.Age.isnull()), "Age"] = median_age
+  train_df.loc[(train_df.Age.isnull()), "Age"] = train_age_comverted
+if len(test_df.Age[test_df.Age.isnull()]) > 0:
+  test_df.loc[(test_df.Age.isnull()), "Age"] = test_age_comverted
 
+#Name
+train_df['Title'] = train_df['Name'].apply(lambda x: get_title(x))
+test_df['Title']  =  test_df['Name'].apply(lambda x: get_title(x))
+train_df['Title'] = train_df['Title'].apply(lambda x: convert_title(x))
+test_df['Title']  =  test_df['Title'].apply(lambda x: convert_title(x))
 
-# remove un-used columns
-train_df = train_df.drop(["Gender", "Age","Cabin", "Name", "Embarked", "Sex", "SibSp", "Parch", "Ticket", "PassengerId"], axis=1)
+#Cabin
+train_df['KindOfCabin'] = train_df['Cabin'].apply(lambda x: get_kind_of_cabin(x))
+test_df['KindOfCabin']  =  test_df['Cabin'].apply(lambda x: get_kind_of_cabin(x))
+train_df['KindOfCabin'] = train_df['KindOfCabin'].apply(lambda x: convert_title(x))
+test_df['KindOfCabin']  =  test_df['KindOfCabin'].apply(lambda x: convert_title(x))
 
-# Load test data, Convert "Sex" to be a dummy variable
-test_df = pd.read_csv("test.csv", header=0)
-test_df["Gender"] = test_df["Sex"].map({"female": 0, "male": 1}).astype(int)
-
-
-######################
-#   name
-
-#test_df['NameSprit'] = test_df['Name'].apply(lambda x: MarkName(x))
-
-#   cabin
-"""
-test_df["Cabin"]\
-= test_df.apply(lambda row: MarkCabin(row["Cabin"]),axis=1)
-
-mean_cabin = test_df["Cabin"].dropna().mean()
-if len(test_df.Cabin[test_df.Cabin.isnull()]) > 0:
-    test_df.loc[(test_df.Cabin.isnull()), "Cabin"] = mean_cabin
-"""
-
-# can use
-#test_df['KindOfCabin'] = test_df['Cabin'].apply(lambda x: get_kind_of_cabin(x))
-#test_df['KindOfCabin'] = test_df['KindOfCabin'].apply(lambda x: convert_title(x))
-# can use
-#test_df['Title'] = test_df['Name'].apply(lambda x: get_title(x))
-#test_df['Title'] = test_df['Title'].apply(lambda x: convert_title(x))
-
-
-
-#   Embarked
+#Embarked
+train_df["Embarked"]\
+= train_df.apply(lambda row: MarkEmbarked(row["Embarked"]),axis=1)
 test_df["Embarked"]\
 = test_df.apply(lambda row: MarkEmbarked(row["Embarked"]),axis=1)
 
-median_embarked = test_df["Embarked"].dropna().mean()
+train_embarked_comverted = train_df["Embarked"].dropna().median()
+test_embarked_comverted = test_df["Embarked"].dropna().median()
 
+if len(train_df.Embarked[train_df.Embarked.isnull()]) > 0:
+  train_df.loc[(train_df.Embarked.isnull()), "Embarked"] = train_embarked_comverted
 if len(test_df.Embarked[test_df.Embarked.isnull()]) > 0:
-    test_df.loc[(test_df.Embarked.isnull()), "Embarked"] = median_embarked
+    test_df.loc[(test_df.Embarked.isnull()), "Embarked"] = test_embarked_comverted
 
-#   FamilySize
+# FamilySize
+train_df["FamilySize"] = train_df["SibSp"] + train_df["Parch"] + 1
 test_df["FamilySize"] = test_df["SibSp"] + test_df["Parch"] + 1
 
-#   person
+train_df["person"] =\
+train_df[["Age", "Gender"]].apply(male_feamale_child,axis=1)
 test_df["person"] =\
 test_df[["Age", "Gender"]].apply(male_feamale_child,axis=1)
 
-#   Fare
-median_fare = test_df["Fare"].dropna().mean()
+# Fare
+train_fare_converted = train_df["Fare"].dropna().median()
+test_fare_converted = test_df["Fare"].dropna().median()
+
+if len(train_df.Fare[train_df.Fare.isnull()]) > 0:
+  train_df.loc[(train_df.Fare.isnull()), "Fare"] = train_fare_converted 
 if len(test_df.Fare[test_df.Fare.isnull()]) > 0:
-  test_df.loc[(test_df.Fare.isnull()), "Fare"] = median_fare
-######################
-
-#   Complement the missing values of "Age" column with average of "Age"
-median_age = test_df["Age"].dropna().mean()
-if len(test_df.Age[test_df.Age.isnull()]) > 0:
-  test_df.loc[(test_df.Age.isnull()), "Age"] = median_age
-
-
+  test_df.loc[(test_df.Fare.isnull()), "Fare"] = test_fare_converted
 
 # Copy test data's "PassengerId" column, and remove un-used columns
 ids = test_df["PassengerId"].values
-test_df = test_df.drop(["Gender", "Age", "Cabin", "Name", "Embarked", "Sex", "SibSp", "Parch", "Ticket",  "PassengerId"], axis=1)
+
+# remove un-used columns
+train_df = train_df.drop(["KindOfCabin", "Gender", "Age","Cabin", "Name", "Embarked", "Sex", "SibSp", "Parch", "Ticket", "PassengerId"], axis=1)
+test_df = test_df.drop(["KindOfCabin", "Gender", "Age", "Cabin", "Name", "Embarked", "Sex", "SibSp", "Parch", "Ticket",  "PassengerId"], axis=1)
 
 # Predict with "Random Forest"
 train_data = train_df.values
